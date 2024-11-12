@@ -7,8 +7,55 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+set.seed(1)
 ```
+
+## Question 2
 
 ```{r}
+sim_mean_pval = function(mu) {
+  n = 30
+  sigma = 5
+  sim_data = tibble(
+    x = rnorm(n, mu, sigma),
+  )
+  sim_test = t.test(sim_data, mu = mu)
+  sims = broom::tidy(sim_test)
+  sims[, c("estimate", "p.value")]
+}
+
+sim_results_df = 
+  expand_grid(
+    mu = c(0,1,2,3,4,5,6),
+    iter = 1:5000
+  ) %>% 
+  mutate(
+    estimate_df = map(mu, sim_mean_pval)
+  ) %>% 
+  unnest(estimate_df)
+
+rejects = sim_results_df %>%
+  filter(p.value <= 0.05)
+ggplot(rejects, aes(x=mu)) + geom_bar()
 
 ```
+
+# As effect size grows larger so will the power. 
+
+```{r}
+avgs = sim_results_df %>%
+  group_by(mu) %>%
+  summarise(mean(estimate))
+ggplot(avgs, aes(x = mu, y=`mean(estimate)`)) + geom_col()
+
+avgs_rejects = sim_results_df %>%
+  filter(p.value <= 0.05) %>%
+  group_by(mu) %>%
+  summarise(mean(estimate))
+ggplot(avgs_rejects, aes(x = mu, y=`mean(estimate)`)) + geom_col()
+
+```
+
+# In the scenarios where the null hypothesis was rejected, the average mean is not apporximately eqaul to the true mean. Following an alpha of 0.05 we are rejecting all which are less than 5% likely to have occurred. 
