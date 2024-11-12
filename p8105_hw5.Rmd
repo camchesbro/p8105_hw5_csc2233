@@ -58,4 +58,26 @@ ggplot(avgs_rejects, aes(x = mu, y=`mean(estimate)`)) + geom_col()
 
 ```
 
-# In the scenarios where the null hypothesis was rejected, the average mean is not apporximately eqaul to the true mean. Following an alpha of 0.05 we are rejecting all which are less than 5% likely to have occurred. 
+# In the scenarios where the null hypothesis was rejected, the average mean is not apporximately eqaul to the true mean. Following an alpha of 0.05 we are rejecting all which are less than 5% likely to have occurred.
+
+
+## Question 3
+
+```{r}
+homicide_df = read_csv(file = "./homicide-data.csv")
+homicide_df = homicide_df %>%
+  mutate(city_state = paste(city, state, sep = ", "))
+
+total = homicide_df %>%
+  group_by(city_state) %>%
+  summarise(murders = n())
+
+unsolved = homicide_df %>%
+  filter(disposition == c("Closed without arrest", "Open/No arrest")) %>%
+  group_by(city_state) %>%
+  summarise(unsolved_murders = n())
+
+both =  full_join(total, unsolved) %>%
+  replace(is.na(both), 0)
+
+```
