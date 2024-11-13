@@ -78,6 +78,28 @@ unsolved = homicide_df %>%
   summarise(unsolved_murders = n())
 
 both =  full_join(total, unsolved) %>%
-  replace(is.na(.),0)
+  drop_na()
+
+prop.test(both$unsolved_murders[3], both$murders[3])
+
+calc_prop_murders = function(dfrow) {
+  unsolved = dfrow[[3]]
+  murders = dfrow[[2]]
+  mur_prop = prop.test(unsolved, murders)
+  results = broom::tidy(mur_prop)
+  results[, c("estimate", "conf.low", "conf.high")]
+}
+
+testing = split(both, both$city_state)
+
+listcol_df = both %>% 
+  mutate(summary = map(testing, calc_prop_murders)) %>%
+  unnest(summary) %>%
+  arrange(estimate)
+
+ggplot(listcol_df, aes(reorder(x = city_state, estimate), y = estimate)) +
+  geom_col() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
+  coord_flip()
 
 ```
