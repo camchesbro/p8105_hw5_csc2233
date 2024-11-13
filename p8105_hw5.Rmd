@@ -2,7 +2,9 @@
 title: "p8105_hw5"
 author: "Cameron Chesbrough"
 date: "2024-11-12"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -42,7 +44,7 @@ ggplot(rejects, aes(x=mu)) + geom_bar()
 
 ```
 
-# As effect size grows larger so will the power. 
+As effect size grows larger so will the power. Power is the measure of rejecting the null hypothesis when it should be rejected. Increasing the effect size will have a smaller likelihood of type 2 error and an increase in power. 
 
 ```{r}
 avgs = sim_results_df %>%
@@ -58,7 +60,7 @@ ggplot(avgs_rejects, aes(x = mu, y=`mean(estimate)`)) + geom_col()
 
 ```
 
-# In the scenarios where the null hypothesis was rejected, the average mean is not apporximately eqaul to the true mean. Following an alpha of 0.05 we are rejecting all which are less than 5% likely to have occurred.
+In the scenarios where the null hypothesis was rejected, the average mean is  apporximately equal to the true mean. Following an alpha of 0.05 we are rejecting all which are less than 5% likely to have occurred, but this will lead to rejections for those both signifigantly larger and smaller. Because of this, when looking across all tests, the mean will be approximately equal. 
 
 
 ## Question 3
@@ -67,7 +69,11 @@ ggplot(avgs_rejects, aes(x = mu, y=`mean(estimate)`)) + geom_col()
 homicide_df = read_csv(file = "./data/homicide-data.csv")
 homicide_df = homicide_df %>%
   mutate(city_state = paste(city, state, sep = ", "))
+```
 
+This dataset describes homicides in large American cities in the past decade. It includes information on where the homicide took place, information describing the victim, and what action from law enforcement followed. The dataset has 52,179 rows and 12 columns. 
+
+```{r}
 total = homicide_df %>%
   group_by(city_state) %>%
   summarise(murders = n())
@@ -98,8 +104,14 @@ listcol_df = both %>%
   arrange(estimate)
 
 ggplot(listcol_df, aes(reorder(x = city_state, estimate), y = estimate)) +
-  geom_col() +
+  geom_col(fill = "white", color = "gray") +
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
-  coord_flip()
+  coord_flip() +
+  labs(
+    title = "Proportion of Murders Unsolved in 50 Large Cities",
+    y = "Proportion of Murders Unsolved",
+    x = "City and State"
+  ) +
+  theme_bw(base_size = 5)
 
 ```
